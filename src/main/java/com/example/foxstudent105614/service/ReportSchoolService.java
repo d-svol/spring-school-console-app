@@ -9,9 +9,11 @@ import java.util.Optional;
 
 public class ReportSchoolService {
     private final SchoolService schoolService;
+    private final CourseService courseService;
 
-    public ReportSchoolService(SchoolService schoolService) {
+    public ReportSchoolService(SchoolService schoolService, CourseService courseService) {
         this.schoolService = schoolService;
+        this.courseService = courseService;
     }
 
     public void printGroupsByStudentCount(int maxStudentCount) {
@@ -61,27 +63,24 @@ public class ReportSchoolService {
         }
     }
 
-    public void printCoursesForStudent(int studentId, List<Integer> courseListId) {
+    public void printSaveStudentInCourse(int studentId, int courseId) {
         Optional<Student> studentOptional = schoolService.findStudentById(studentId);
-
+        Optional<Course> courseOptional = courseService.findById(courseId);
         if (studentOptional.isPresent()) {
             Student student = studentOptional.get();
-            courseListId.forEach(courseId -> {
-                Optional<Course> courseOptional = schoolService.findCourseById(courseId);
 
-                if (courseOptional.isPresent()) {
-                    schoolService.saveStudentInCourse(studentId, courseId);
-                    System.out.println("Added student with ID " + student.studentId() + " to course with ID: " + courseId);
-                } else {
-                    System.out.println("Error: Course not found for ID - CourseID: " + courseId);
-                }
-            });
+            if (courseOptional.isPresent()) {
+                schoolService.saveStudentInCourse(studentId, courseId);
+                System.out.println("Added student with ID " + student.studentId() + " to course with ID: " + courseId);
+            } else {
+                System.out.println("Error: Course not found for ID - CourseID: " + courseId);
+            }
         } else {
             System.out.println("Error: Student not found for ID - StudentID: " + studentId);
         }
     }
 
-    public void printRemoveStudentFromCourse(int studentId, int courseId) {
+    public void printDeleteStudentFromCourse(int studentId, int courseId) {
         schoolService.deleteStudentFromCourse(studentId, courseId);
         System.out.println("Removed student with ID " + studentId + " from course with ID " + courseId);
     }

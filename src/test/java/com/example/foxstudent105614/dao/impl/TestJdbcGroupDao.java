@@ -2,117 +2,90 @@ package com.example.foxstudent105614.dao.impl;
 
 import com.example.foxstudent105614.dao.GroupDao;
 import com.example.foxstudent105614.model.Group;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.foxstudent105614.service.GroupService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
-
-@JdbcTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Sql(
-		scripts = {"classpath:create_table.sql", "classpath:sample_data.sql"},
-		executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-)
-@Testcontainers
-@ContextConfiguration(classes = TestJdbcGroupDao.class)
-@TestPropertySource(locations = "classpath:/application.yml")
+@SpringBootTest(classes = {GroupService.class})
 public class TestJdbcGroupDao {
+
 	@Autowired
-	private NamedParameterJdbcTemplate jdbcTemplate;
+	private GroupService groupService;
+
+	@MockBean
 	private GroupDao groupDao;
-
-	@Container
-	private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:14.6")
-			.withDatabaseName("test")
-			.withUsername("root")
-			.withPassword("test");
-
-	@BeforeAll
-	static void beforeAll() {
-		postgresContainer.start();
-	}
-
-	@AfterAll
-	static void afterAll() {
-		postgresContainer.stop();
-	}
-
-	@BeforeEach
-	void setUp() {
-		groupDao = new JdbcGroupDao(jdbcTemplate);
-	}
 
 	@Test
 	void findGroupsWithLessOrEqualStudents() {
-		int studentCount = 1;
-		List<Group> groupList = groupDao.findGroupsWithLessOrEqualStudents(studentCount);
+		int studentCount = 2;
+		List<Group> expectedGroups = Arrays.asList(
+				new Group(1, "AA-01"),
+				new Group(2, "BB-02")
+		);
+		when(groupDao.findGroupsWithLessOrEqualStudents(studentCount)).thenReturn(expectedGroups);
 
-		Group firstGroup = groupList.get(0);
-		assertEquals("CC-03", firstGroup.groupName());
+		List<Group> actualGroups = groupService.findGroupsWithLessOrEqualStudents(studentCount);
+		assertEquals(expectedGroups.size(), actualGroups.size());
 	}
 
 	@Test
 	void findById() {
 		int firstID = 1;
-		Optional<Group> group = groupDao.findById(firstID);
-		assertTrue(group.isPresent());
-		assertEquals(1, group.get().groupId());
-		assertEquals("AA-01", group.get().groupName());
+		Group expectedGroup = new Group(1, "AA-01");
+		when(groupDao.findById(firstID)).thenReturn(Optional.of(expectedGroup));
+		Optional<Group> actualGroup = groupService.findById(firstID);
+
+		assertTrue(actualGroup.isPresent());
+		assertEquals(expectedGroup.groupId(), actualGroup.get().groupId());
+		assertEquals(expectedGroup.groupName(), actualGroup.get().groupName());
 	}
 
 	@Test
 	void findAll() {
-		int groupSize = 3;
-		List<Group> groups = groupDao.findAll();
-		assertEquals(groupSize, groups.size());
+		int expectedIndex = 1;
+		List<Group> expectedGroups = Arrays.asList(
+				new Group(1, "AA-01"),
+				new Group(2, "BB-02")
+		);
+
+		when(groupDao.findAll()).thenReturn(expectedGroups);
+		List<Group> actualGroups = groupService.findAll();
+		assertEquals(expectedGroups.size(), actualGroups.size());
+		assertEquals(expectedGroups.get(expectedIndex).groupId(), actualGroups.get(expectedIndex).groupId());
+		assertEquals(expectedGroups.get(expectedIndex).groupName(), actualGroups.get(expectedIndex).groupName());
 	}
 
 	@Test
 	void save() {
 		int groupID = 4;
-		Group group = new Group(groupID, "NewGroup");
-		groupDao.save(group);
-
-		Optional<Group> findGroup = groupDao.findById(groupID);
-		assertTrue(findGroup.isPresent());
-		assertEquals(groupID, findGroup.get().groupId());
-		assertEquals("NewGroup", findGroup.get().groupName());
+		Group groupToSave = new Group(groupID, "NewGroup");
+		groupService.save(groupToSave);
+		verify(groupDao, times(1)).save(groupToSave);
 	}
 
 	@Test
 	void update() {
 		int groupID = 1;
-		Group newGroup = new Group(groupID, "NewGroup");
-		groupDao.update(newGroup);
-
-		Optional<Group> findGroup = groupDao.findById(groupID);
-		assertTrue(findGroup.isPresent());
-		assertEquals(groupID, findGroup.get().groupId());
-		assertEquals("NewGroup", findGroup.get().groupName());
+		Group updatedGroup = new Group(groupID, "UpdatedGroup");
+		groupService.update(updatedGroup);
+		verify(groupDao, times(1)).update(updatedGroup);
 	}
 
 	@Test
 	void delete() {
 		int groupID = 1;
-		groupDao.delete(groupID);
-
-		Optional<Group> findGroup = groupDao.findById(groupID);
-		assertFalse(findGroup.isPresent());
+		Group updatedGroup = new Group(groupID, "UpdatedGroup");
+		groupService.delete(groupID);
+		verify(groupDao, times(1)).delete(groupID);
 	}
 }

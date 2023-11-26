@@ -1,6 +1,7 @@
 package com.example.foxstudent105614;
 
-import com.example.foxstudent105614.runner.DbLoader;
+import com.example.foxstudent105614.controller.SchoolManager;
+import com.example.foxstudent105614.service.DbLoadingService;
 import com.example.foxstudent105614.runner.Repl;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -9,18 +10,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class Student105614Application  implements ApplicationRunner {
-	private final DbLoader dbLoader;
-	private final Repl repl;
+	private final DbLoadingService dbLoader;
+	private final SchoolManager schoolManager;
 
-	public Student105614Application(DbLoader dbLoader, Repl repl) {
-		this.dbLoader = dbLoader;
-		this.repl = repl;
+	public Student105614Application(DbLoadingService dbLoadingService, SchoolManager schoolManager) {
+		this.dbLoader = dbLoadingService;
+		this.schoolManager = schoolManager;
 	}
 
 	@Override
 	public void run(ApplicationArguments args) {
 		dbLoader.load();
-		repl.run();
+		new Repl(schoolManager).run();
 	}
 
 	public static void main(String[] args) {

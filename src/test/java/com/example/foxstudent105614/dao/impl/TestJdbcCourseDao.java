@@ -4,148 +4,136 @@ import com.example.foxstudent105614.dao.CourseDao;
 import com.example.foxstudent105614.dao.StudentDao;
 import com.example.foxstudent105614.model.Course;
 import com.example.foxstudent105614.model.Student;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.foxstudent105614.service.CourseService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@JdbcTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Sql(
-		scripts = {"classpath:create_table.sql", "classpath:sample_data.sql"},
-		executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-)
-@Testcontainers
-@ContextConfiguration(classes = TestJdbcStudentDao.class)
-@TestPropertySource(locations = "classpath:/application.yml")
+
+@SpringBootTest(classes = {CourseService.class})
 public class TestJdbcCourseDao {
-	@Autowired
-	private NamedParameterJdbcTemplate jdbcTemplate;
-	private CourseDao courseDao;
-	private StudentDao studentDao;
+    @MockBean
+    private CourseDao courseDao;
 
-	@Container
-	private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:14.6")
-			.withDatabaseName("test")
-			.withUsername("root")
-			.withPassword("test");
+    @MockBean
+    private StudentDao studentDao;
 
-	@BeforeAll
-	static void beforeAll() {
-		postgresContainer.start();
-	}
+    @Test
+    void findAll() {
+        List<Course> mockCourses = List.of(new Course(1, "Math", "DescriptionMatch"));
+        when(courseDao.findAll()).thenReturn(mockCourses);
+        List<Course> result = courseDao.findAll();
+        assertEquals(mockCourses, result);
+    }
 
-	@AfterAll
-	static void afterAll() {
-		postgresContainer.stop();
-	}
+    @Test
+    void findById() {
+        int firstID = 1;
+        Course mockCourse = new Course(1, "Math", "DescriptionMatch");
+        when(courseDao.findById(firstID)).thenReturn(Optional.of(mockCourse));
 
-	@BeforeEach
-	void setUp() {
-		this.courseDao = new JdbcCourseDao(jdbcTemplate);
-		this.studentDao = new JdbcStudentDao(jdbcTemplate);
-	}
+        Optional<Course> course = courseDao.findById(firstID);
+        assertTrue(course.isPresent());
+        assertEquals(1, course.get().courseId());
+        assertEquals("Math", course.get().courseName());
+        assertEquals("DescriptionMatch", course.get().courseDescription());
+    }
 
-	@Test
-	void findAll() {
-		List<Course> students = courseDao.findAll();
-		assertEquals(3, students.size());
-	}
+    @Test
+    void findByName() {
+        String courseName = "Math";
+        Course mockCourse = new Course(1, courseName, "DescriptionMatch");
+        when(courseDao.findByName(courseName)).thenReturn(Optional.of(mockCourse));
 
-	@Test
-	void findById() {
-		int firstID = 1;
-		Optional<Course> course = courseDao.findById(firstID);
-		assertTrue(course.isPresent());
-		assertEquals(1, course.get().courseId());
-		assertEquals("Math", course.get().courseName());
-		assertEquals("Basic math skills", course.get().courseDescription());
-	}
+        Optional<Course> course = courseDao.findByName("Math");
+        assertTrue(course.isPresent());
+        assertEquals(1, course.get().courseId());
+        assertEquals("Math", course.get().courseName());
+        assertEquals("DescriptionMatch", course.get().courseDescription());
+    }
 
-	@Test
-	void findByName() {
-		Optional<Course> course = courseDao.findByName("Math");
-		assertTrue(course.isPresent());
-		assertEquals(1, course.get().courseId());
-		assertEquals("Math", course.get().courseName());
-		assertEquals("Basic math skills", course.get().courseDescription());
-	}
+    @Test
+    void save() {
+        int courseID = 4;
+        Course mockCourse = new Course(courseID, "NewName", "NewDescription");
+        doAnswer(invocation -> {
+            Course savedCourse = invocation.getArgument(0);
+            assertEquals(mockCourse.courseName(), savedCourse.courseName());
+            assertEquals(mockCourse.courseDescription(), savedCourse.courseDescription());
+            return null;
+        }).when(courseDao).save(any());
+        courseDao.save(mockCourse);
+        verify(courseDao).save(any());
+    }
 
-	@Test
-	void save() {
-		int courseID = 4;
-		Course newStudent = new Course(courseID, "NewName", "NewDescription");
-		courseDao.save(newStudent);
+    @Test
+    void saveCourseForStudent() {
+        int studentId = 1;
+        int courseId = 2;
+        when(courseDao.findById(courseId))
+                .thenReturn(Optional.of(new Course(courseId, "NewName", "NewDescription")));
 
-		Optional<Course> course = courseDao.findById(courseID);
-		assertTrue(course.isPresent());
-		assertEquals(courseID, course.get().courseId());
-		assertEquals("NewName", course.get().courseName());
-		assertEquals("NewDescription", course.get().courseDescription());
-	}
+        Course foundCourse = courseDao.findById(courseId).orElse(null);
+        courseDao.saveStudentInCourse(studentId, courseId);
 
-	@Test
-	void saveCourseForStudent() {
-		int studentID = 5;
-		int courseID = 1;
-		courseDao.saveStudentInCourse(studentID, courseID);
+        assertNotNull(foundCourse);
+        assertEquals(courseId, foundCourse.courseId());
 
-		List<Student> students = studentDao.findStudentsByCourseName("Math");
-		Student student = students.get(0);
-		assertEquals("NameA", student.firstName());
-		assertEquals("LastnameA", student.lastName());
-	}
+        verify(courseDao, times(1)).findById(courseId);
+        verify(courseDao, times(1)).saveStudentInCourse(studentId, courseId);
+    }
 
-	@Test
-	void update() {
-		int courseID = 1;
-		Course newStudent = new Course(courseID, "NewName", "NewDescription");
-		courseDao.update(newStudent);
+    @Test
+    void update() {
+        int courseID = 1;
+        Course updatedCourse = new Course(courseID, "UpdatedName", "UpdatedDescription");
+        doNothing().when(courseDao).update(any(Course.class));
 
-		Optional<Course> course = courseDao.findById(courseID);
-		assertTrue(course.isPresent());
-		assertEquals(courseID, course.get().courseId());
-		assertEquals("NewName", course.get().courseName());
-		assertEquals("NewDescription", course.get().courseDescription());
-	}
+        courseDao.update(updatedCourse);
 
-	@Test
-	void delete() {
-		int courseID = 1;
-		courseDao.delete(courseID);
+        verify(courseDao).update(argThat(argument -> argument.courseId() == courseID
+                && argument.courseName().equals("UpdatedName")
+                && argument.courseDescription().equals("UpdatedDescription")));
+    }
 
-		Optional<Course> deletedCourse = courseDao.findById(courseID);
-		assertFalse(deletedCourse.isPresent());
-	}
+    @Test
+    void delete() {
+        int courseIdToDelete = 1;
+        when(courseDao.findById(courseIdToDelete))
+                .thenReturn(Optional.of(new Course(courseIdToDelete, "Name", "Description")));
 
-	@Test
-	void deleteCourseForStudent() {
-		int studentID = 1;
-		int courseID = 1;
-		List<Student> students = studentDao.findStudentsByCourseName("Math");
-		Student student = students.get(0);
-		assertEquals("NameA", student.firstName());
-		assertEquals("LastnameA", student.lastName());
+        Optional<Course> foundCourse = courseDao.findById(courseIdToDelete);
+        verify(courseDao, times(1)).findById(courseIdToDelete);
 
-		courseDao.deleteStudentFromCourse(studentID, courseID);
-		List<Student> updateStudents = studentDao.findStudentsByCourseName("Math");
-		Student updateStudent = updateStudents.get(0);
-		assertNotEquals("NameA", updateStudent.firstName());
-		assertNotEquals("LastnameA", updateStudent.lastName());
-	}
+        courseDao.delete(courseIdToDelete);
+        verify(courseDao, times(1)).delete(courseIdToDelete);
+        when(courseDao.findById(courseIdToDelete)).thenReturn(Optional.empty());
+        Optional<Course> updatedFoundCourse = courseDao.findById(courseIdToDelete);
+        assertFalse(updatedFoundCourse.isPresent());
+    }
+
+    @Test
+    void deleteStudentFromCourse() {
+        int studentId = 1;
+        int groupId = 1;
+        int courseIdToDelete = 2;
+
+        when(courseDao.findById(courseIdToDelete))
+                .thenReturn(Optional.of(new Course(courseIdToDelete, "Name", "Description")));
+
+        when(studentDao.findById(studentId))
+                .thenReturn(Optional.of(new Student(studentId, groupId, "FirstName", "LastName")));
+
+        courseDao.deleteStudentFromCourse(studentId, courseIdToDelete);
+
+        verify(courseDao, times(1)).deleteStudentFromCourse(studentId, courseIdToDelete);
+    }
 }

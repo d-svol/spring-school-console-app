@@ -5,7 +5,7 @@ package com.example.foxstudent105614.runner;
 
 
 
-import com.example.foxstudent105614.service.SchoolManager;
+import com.example.foxstudent105614.controller.SchoolManager;
 
 import java.util.Arrays;
 import java.util.Scanner;

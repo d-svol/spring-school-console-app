@@ -1,17 +1,14 @@
 package com.example.foxstudent105614.runner;
 
 
-import com.example.foxstudent105614.service.SchoolManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import com.example.foxstudent105614.controller.SchoolManager;
 
 import java.util.Scanner;
 
-@Component
+
 public class Repl {
 	private final SchoolManager schoolManager;
 
-	@Autowired
 	public Repl(SchoolManager schoolManager) {
 		this.schoolManager = schoolManager;
 	}
