@@ -4,7 +4,6 @@ import com.example.foxstudent105614.model.Course;
 import com.example.foxstudent105614.model.Group;
 import com.example.foxstudent105614.model.Student;
 import com.github.javafaker.Faker;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;

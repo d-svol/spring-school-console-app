@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = {GroupService.class})
 public class TestJdbcGroupDao {
-
 	@Autowired
 	private GroupService groupService;
 
@@ -84,7 +83,6 @@ public class TestJdbcGroupDao {
 	@Test
 	void delete() {
 		int groupID = 1;
-		Group updatedGroup = new Group(groupID, "UpdatedGroup");
 		groupService.delete(groupID);
 		verify(groupDao, times(1)).delete(groupID);
 	}
