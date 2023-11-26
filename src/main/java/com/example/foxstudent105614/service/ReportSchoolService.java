@@ -3,10 +3,12 @@ package com.example.foxstudent105614.service;
 import com.example.foxstudent105614.model.Course;
 import com.example.foxstudent105614.model.Group;
 import com.example.foxstudent105614.model.Student;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class ReportSchoolService {
     private final SchoolService schoolService;
     private final CourseService courseService;

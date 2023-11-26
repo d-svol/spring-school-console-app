@@ -1,7 +1,7 @@
 package com.example.foxstudent105614.service;
 
-import com.example.foxstudent105614.model.Student;
 import com.example.foxstudent105614.dao.StudentDao;
+import com.example.foxstudent105614.model.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
