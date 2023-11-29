@@ -3,6 +3,8 @@ package com.example.foxstudent105614.service;
 import com.example.foxstudent105614.model.Course;
 import com.example.foxstudent105614.model.Group;
 import com.example.foxstudent105614.model.Student;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,6 +12,8 @@ import java.util.Optional;
 
 @Service
 public class ReportSchoolService {
+    private final Logger logger = LoggerFactory.getLogger(ReportSchoolService.class);
+
     private final SchoolService schoolService;
     private final CourseService courseService;
 
@@ -21,9 +25,9 @@ public class ReportSchoolService {
     public void printGroupsByStudentCount(int maxStudentCount) {
         List<Group> groups = schoolService.findGroupsByStudentCount(maxStudentCount);
         if (groups.isEmpty()) {
-            System.out.println("No groups found with " + maxStudentCount + " or fewer students.");
+            logger.info("No groups found with {} or fewer students.", maxStudentCount);
         } else {
-            System.out.println("Groups of " + maxStudentCount + " or fewer students:");
+            logger.info("Groups of {} or fewer students:", maxStudentCount);
             for (Group group : groups) {
                 System.out.println(group.toString());
             }
@@ -33,11 +37,11 @@ public class ReportSchoolService {
     public void printStudentsByCourseName(String courseName) {
         List<Student> students = schoolService.findStudentsByCourseName(courseName);
         if (students.isEmpty()) {
-            System.out.println("No students found for the course with name: " + courseName);
+            logger.info("No students found for the course with name: {}", courseName);
         } else {
-            System.out.println("Students related to the course '" + courseName + "':");
+            logger.info("Students related to the course '{}':", courseName);
             for (Student student : students) {
-                System.out.println(student.firstName() + " " + student.lastName() + " (ID: " + student.studentId() + ")");
+                logger.info("{} {} (ID: {})", student.firstName(), student.lastName(), student.studentId());
             }
         }
     }
@@ -46,9 +50,10 @@ public class ReportSchoolService {
         Optional<Group> groupOptional = schoolService.findGroupById(groupId);
 
         if (groupOptional.isEmpty()) {
-            System.out.println("Error: Group not found for id: " + groupId);
+            logger.error("Error: Group not found for id: {}", groupId);
         } else {
             schoolService.addStudent(groupId, firstName, lastName);
+            logger.info("Added student {} {} to group with ID: {}", firstName, lastName, groupId);
         }
     }
 
@@ -57,11 +62,11 @@ public class ReportSchoolService {
 
         studentOptional.ifPresent(student -> {
             schoolService.deleteStudentById(studentId);
-            System.out.println("Deleted student with ID: " + studentId);
+            logger.info("Deleted student with ID: {}", studentId);
         });
 
         if (studentOptional.isEmpty()) {
-            System.out.println("Student not found with ID: " + studentId);
+            logger.error("Student not found with ID: {}", studentId);
         }
     }
 
@@ -73,18 +78,17 @@ public class ReportSchoolService {
 
             if (courseOptional.isPresent()) {
                 schoolService.saveStudentInCourse(studentId, courseId);
-                System.out.println("Added student with ID " + student.studentId() + " to course with ID: " + courseId);
+                logger.info("Added student {} {} to course with ID: {}", student.firstName(), student.lastName(), courseId);
             } else {
-                System.out.println("Error: Course not found for ID - CourseID: " + courseId);
+                logger.error("Error: Course not found for ID - CourseID: {}", courseId);
             }
         } else {
-            System.out.println("Error: Student not found for ID - StudentID: " + studentId);
+            logger.error("Error: Student not found for ID - StudentID: {}", studentId);
         }
     }
 
     public void printDeleteStudentFromCourse(int studentId, int courseId) {
         schoolService.deleteStudentFromCourse(studentId, courseId);
-        System.out.println("Removed student with ID " + studentId + " from course with ID " + courseId);
+        logger.info("Removed student with ID {} from course with ID {}", studentId, courseId);
     }
-
 }

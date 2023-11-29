@@ -34,6 +34,7 @@ public class DbLoadingService {
     private static final String SCRIPT_FILE_NAME = "create_table.sql";
 
     private static final Logger log = LogManager.getLogger(DbLoadingService.class);
+
     private final JdbcTemplate jdbcTemplate;
 
     public DbLoadingService(JdbcTemplate jdbcTemplate) {

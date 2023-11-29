@@ -1,11 +1,8 @@
 package com.example.foxstudent105614.runner;
 
-
-
-
-
-
 import com.example.foxstudent105614.controller.SchoolManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -56,18 +53,19 @@ public enum Command {
 	QUIT("q") {
 		@Override
 		public void run(SchoolManager schoolManager, Scanner in) {
-			System.out.println("Exit");
+			logger.info("Exit");
 		}
 	},
 
 	UNKNOWN("") {
 		@Override
 		public void run(SchoolManager schoolManager, Scanner in) {
-			System.out.println("Unknown command requested");
+			logger.warn("Unknown command requested");
 		}
 	};
 
 	private final String code;
+	private static final Logger logger = LoggerFactory.getLogger(Command.class);
 
 	Command(String code) {
 		this.code = code;
