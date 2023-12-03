@@ -2,12 +2,14 @@ package com.example.foxstudent105614.dao.impl;
 
 import com.example.foxstudent105614.dao.CourseDao;
 import com.example.foxstudent105614.model.Course;
-import org.springframework.dao.DataAccessException;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.DataClassRowMapper;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
@@ -15,91 +17,94 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Transactional
 public class JdbcCourseDao implements CourseDao {
-	public static final String FIND_BY_NAME = "SELECT * FROM courses WHERE course_name = :course_name";
-	private static final String FIND_BY_ID = "SELECT * FROM courses WHERE course_id = :course_id";
-	private static final String FIND_ALL = "SELECT * FROM courses";
-	private static final String SAVE = "INSERT INTO courses (course_name, course_description) VALUES (:course_name, :course_description)";
-	private static final String SAVE_STUDENT_COURSE = "INSERT INTO student_course (student_id, course_id) VALUES (:student_id, :course_id)";
-	private static final String UPDATE = "UPDATE courses SET course_name = :course_name, course_description = :course_description WHERE course_id = :course_id";
-	private static final String DELETE = "DELETE FROM courses WHERE course_id = :course_id";
-	private static final String DELETE_STUDENT_COURSE = "DELETE FROM student_course WHERE student_id = :student_id AND course_id = :course_id";
+    public static final String FIND_BY_NAME = "SELECT * FROM Course c WHERE c.course_name = :course_name";
+    private static final String FIND_ALL = "SELECT * FROM Course";
+    private static final String SAVE_STUDENT_COURSE = "INSERT INTO student_course (student_id, course_id) VALUES (:student_id, :course_id)";
+    private static final String DELETE_STUDENT_COURSE = "DELETE FROM student_course WHERE student_id = :student_id AND course_id = :course_id";
 
-	private final NamedParameterJdbcTemplate jdbcTemplate;
-	private final RowMapper<Course> courseRowMapper = DataClassRowMapper.newInstance(Course.class);
+    @PersistenceContext
+    private EntityManager entityManager;
+    private static final Logger logger = LoggerFactory.getLogger(JdbcCourseDao.class);
 
-	public JdbcCourseDao(NamedParameterJdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
-	}
+    @Override
+    public Optional<Course> findById(int id) {
+        try {
+            return Optional.ofNullable(entityManager.find(Course.class, id));
+        } catch (EmptyResultDataAccessException e) {
+            logger.error("Error find student by ID '{}'", id, e);
+            return Optional.empty();
+        }
+    }
 
-	@Override
-	public Optional<Course> findById(int id) {
-		MapSqlParameterSource parameter = new MapSqlParameterSource();
-		parameter.addValue("course_id", id);
-		try {
-			return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_BY_ID, parameter, courseRowMapper));
-		} catch (EmptyResultDataAccessException e) {
-			return Optional.empty();
-		}
-	}
+    @Override
+    public List<Course> findAll() {
+        try {
+            return entityManager. createQuery(FIND_ALL, Course.class).getResultList();
+        } catch (Exception e) {
+            logger.error("Error executing 'findAll' database query: ", e);
+            return Collections.emptyList();
+        }
+    }
 
-	@Override
-	public List<Course> findAll() {
-		try {
-			return jdbcTemplate.query(FIND_ALL, courseRowMapper);
-		} catch (DataAccessException ex) {
-			return Collections.emptyList();
-		}
-	}
+    @Override
+    public Optional<Course> findByName(String name) {
+        try {
+            return Optional.ofNullable(entityManager.createQuery(FIND_BY_NAME, Course.class)
+                    .setParameter("course_name", name)
+                    .getSingleResult());
+        } catch (NoResultException e) {
+            logger.error("No result found for course with name '{}'", name);
+            return Optional.empty();
+        }
+    }
 
-	@Override
-	public Optional<Course> findByName(String name) {
-		try {
-			MapSqlParameterSource parameter = new MapSqlParameterSource();
-			parameter.addValue("course_name", name);
-			return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_BY_NAME, parameter, courseRowMapper));
-		} catch (DataAccessException ex) {
-			return Optional.empty();
-		}
-	}
+    @Override
+    public void save(Course entity) {
+        try {
+            entityManager.persist(entity);
+        } catch (EntityExistsException e) {
+            logger.error("Error save course with ID '{}'", entity.getCourseId(), e);
+        }
+    }
 
-	@Override
-	public void save(Course entity) {
-		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("course_name", entity.courseName());
-		parameters.addValue("course_description", entity.courseDescription());
-		jdbcTemplate.update(SAVE, parameters);
-	}
+    @Override
+    public void saveStudentInCourse(int studentId, int courseId) {
+        try {
+            entityManager.createNativeQuery(SAVE_STUDENT_COURSE)
+                    .setParameter("student_id", studentId)
+                    .setParameter("course_id", courseId)
+                    .executeUpdate();
+        } catch (Exception e) {
+            logger.error("Error saving student with ID '{}' in course with ID '{}'", studentId, courseId, e);
+        }
+    }
 
-	@Override
-	public void saveStudentInCourse(int studentId, int courseId) {
-		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("student_id", studentId);
-		parameters.addValue("course_id", courseId);
-		jdbcTemplate.update(SAVE_STUDENT_COURSE, parameters);
-	}
+    @Override
+    public void update(Course entity) {
+        entityManager.merge(entity);
+    }
 
-	@Override
-	public void update(Course entity) {
-		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue("course_id", entity.courseId());
-		parameters.addValue("course_name", entity.courseName());
-		parameters.addValue("course_description", entity.courseDescription());
-		jdbcTemplate.update(UPDATE, parameters);
-	}
+    @Override
+    public void delete(int id) {
+        Course course = entityManager.find(Course.class, id);
+        if (course != null) {
+            entityManager.remove(course);
+        } else {
+            logger.error("Course with ID '{}' not found. Unable to delete.", id);
+        }
+    }
 
-	@Override
-	public void delete(int id) {
-		MapSqlParameterSource parameter = new MapSqlParameterSource();
-		parameter.addValue("course_id", id);
-		jdbcTemplate.update(DELETE, parameter);
-	}
-
-	@Override
-	public void deleteStudentFromCourse(int studentId, int courseId) {
-		MapSqlParameterSource parameter = new MapSqlParameterSource();
-		parameter.addValue("course_id", courseId);
-		parameter.addValue("student_id", studentId);
-		jdbcTemplate.update(DELETE_STUDENT_COURSE, parameter);
-	}
+    @Override
+    public void deleteStudentFromCourse(int studentId, int courseId) {
+        try {
+            entityManager.createNativeQuery(DELETE_STUDENT_COURSE)
+                    .setParameter("student_id", studentId)
+                    .setParameter("course_id", courseId)
+                    .executeUpdate();
+        } catch (Exception e) {
+            logger.error("Error deleting student with ID '{}' from course with ID '{}'", studentId, courseId, e);
+        }
+    }
 }

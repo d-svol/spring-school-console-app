@@ -41,7 +41,7 @@ public class ReportSchoolService {
         } else {
             logger.info("Students related to the course '{}':", courseName);
             for (Student student : students) {
-                logger.info("{} {} (ID: {})", student.firstName(), student.lastName(), student.studentId());
+                logger.info("{} {} (ID: {})", student.getFirstName(), student.getLastName(), student.getStudentId());
             }
         }
     }
@@ -62,7 +62,7 @@ public class ReportSchoolService {
 
         studentOptional.ifPresent(student -> {
             schoolService.deleteStudentById(studentId);
-            logger.info("Deleted student with ID: {}", studentId);
+            logger.info("Deleted student: {}", student);
         });
 
         if (studentOptional.isEmpty()) {
@@ -78,7 +78,7 @@ public class ReportSchoolService {
 
             if (courseOptional.isPresent()) {
                 schoolService.saveStudentInCourse(studentId, courseId);
-                logger.info("Added student {} {} to course with ID: {}", student.firstName(), student.lastName(), courseId);
+                logger.info("Added student {} {} to course with ID: {}", student.getFirstName(), student.getLastName(), courseId);
             } else {
                 logger.error("Error: Course not found for ID - CourseID: {}", courseId);
             }
