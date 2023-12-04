@@ -2,6 +2,8 @@ package com.example.foxstudent105614.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "courses")
 public class Course {
@@ -15,6 +17,9 @@ public class Course {
 
     @Column(name = "course_description")
     private String courseDescription;
+
+    @ManyToMany(mappedBy = "courses")
+    private List<Student> students;
 
     public Course() {
     }

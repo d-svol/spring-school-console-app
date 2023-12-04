@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Repository
 @Transactional
-public class JdbcStudentDao implements StudentDao {
+public class JpaStudentDao implements StudentDao {
 	private static final String FIND_ALL = "SELECT * FROM students";
 	private static final String FIND_ALL_BY_COURSE_NAME =
 			"SELECT s FROM Student s JOIN s.courses c WHERE c.courseName = :course_name";
@@ -26,7 +26,7 @@ public class JdbcStudentDao implements StudentDao {
 
 	@PersistenceContext
 	private EntityManager entityManager;
-	private static final Logger logger = LoggerFactory.getLogger(JdbcStudentDao.class);
+	private static final Logger logger = LoggerFactory.getLogger(JpaStudentDao.class);
 
 	@Override
 	public List<Student> findStudentsByCourseName(String courseName) {

@@ -34,12 +34,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-//@Sql(
-//        scripts = {"classpath:create_table.sql", "classpath:sample_data.sql"},
-//        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-//)
-//@RunWith(SpringRunner.class)
-public class TestJdbcCourseDao {
+@Sql(
+        scripts = {"classpath:create_table.sql", "classpath:sample_data.sql"},
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+)
+public class TestJpaCourseDao {
     @Autowired
     private CourseDao courseDao;
 
@@ -48,8 +47,8 @@ public class TestJdbcCourseDao {
         List<Course> courses = courseDao.findAll();
         assertEquals(3, courses.size());
     }
+}
 
-    //
 //    @Test
 //    void findById() {
 //        int firstID = 1;
@@ -129,4 +128,3 @@ public class TestJdbcCourseDao {
 //        List<Student> studentsAfterDeletion = studentDao.findStudentsByCourseName("Math");
 //        assertTrue(studentsAfterDeletion.isEmpty());
 //    }
-}

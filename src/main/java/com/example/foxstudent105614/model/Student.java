@@ -3,6 +3,7 @@ package com.example.foxstudent105614.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -23,6 +24,14 @@ public class Student {
 
     @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    @ManyToMany
+    @JoinTable(
+            name = "student_course",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private List<Course> courses;
 
     public Student() {
     }

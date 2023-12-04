@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class JdbcGroupDao implements GroupDao {
+public class JpaGroupDao implements GroupDao {
     private static final String FIND_ALL_BY_COUNT =
             "SELECT g FROM Group g " +
                     "LEFT JOIN g.students s " +
@@ -23,7 +23,7 @@ public class JdbcGroupDao implements GroupDao {
 
     @PersistenceContext
     private EntityManager entityManager;
-    private static final Logger logger = LoggerFactory.getLogger(JdbcCourseDao.class);
+    private static final Logger logger = LoggerFactory.getLogger(JpaCourseDao.class);
 
     @Override
     public List<Group> findGroupsWithLessOrEqualStudents(int maxStudentCount) {

@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Repository
 @Transactional
-public class JdbcCourseDao implements CourseDao {
+public class JpaCourseDao implements CourseDao {
     public static final String FIND_BY_NAME = "SELECT * FROM Course c WHERE c.course_name = :course_name";
     private static final String FIND_ALL = "SELECT * FROM Course";
     private static final String SAVE_STUDENT_COURSE = "INSERT INTO student_course (student_id, course_id) VALUES (:student_id, :course_id)";
@@ -26,7 +26,7 @@ public class JdbcCourseDao implements CourseDao {
 
     @PersistenceContext
     private EntityManager entityManager;
-    private static final Logger logger = LoggerFactory.getLogger(JdbcCourseDao.class);
+    private static final Logger logger = LoggerFactory.getLogger(JpaCourseDao.class);
 
     @Override
     public Optional<Course> findById(int id) {
@@ -54,7 +54,7 @@ public class JdbcCourseDao implements CourseDao {
             return Optional.ofNullable(entityManager.createQuery(FIND_BY_NAME, Course.class)
                     .setParameter("course_name", name)
                     .getSingleResult());
-        } catch (NoResultException e) {
+        } catch (Exception e) {
             logger.error("No result found for course with name '{}'", name);
             return Optional.empty();
         }
