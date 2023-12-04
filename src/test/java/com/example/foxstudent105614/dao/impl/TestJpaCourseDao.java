@@ -1,32 +1,11 @@
 package com.example.foxstudent105614.dao.impl;
 
-import com.example.foxstudent105614.Student105614Application;
-import com.example.foxstudent105614.controller.SchoolManager;
-import com.example.foxstudent105614.dao.CourseDao;
-import com.example.foxstudent105614.dao.StudentDao;
 import com.example.foxstudent105614.model.Course;
-import com.example.foxstudent105614.service.DbLoadingService;
-import com.example.foxstudent105614.service.SchoolService;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
@@ -40,15 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 )
 public class TestJpaCourseDao {
     @Autowired
-    private CourseDao courseDao;
+    private JpaCourseDao jpaCourseDao;
 
     @Test
     void findAll() {
-        List<Course> courses = courseDao.findAll();
+        List<Course> courses = jpaCourseDao.findAll();
         assertEquals(3, courses.size());
     }
 }
-
 //    @Test
 //    void findById() {
 //        int firstID = 1;

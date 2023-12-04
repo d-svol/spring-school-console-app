@@ -8,5 +8,6 @@
     <root level="info">
         <appender-ref ref="CONSOLE"/>
     </root>
-
+    <logger name="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" level="ERROR" />
+    <logger name="com.zaxxer.hikari" level="ERROR" />
 </configuration>
