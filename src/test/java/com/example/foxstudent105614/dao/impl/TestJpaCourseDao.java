@@ -1,5 +1,6 @@
 package com.example.foxstudent105614.dao.impl;
 
+import com.example.foxstudent105614.dao.CourseDao;
 import com.example.foxstudent105614.model.Course;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +12,16 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(
         scripts = {"classpath:create_table.sql", "classpath:sample_data.sql"},
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-public class TestJpaCourseDao {
+class TestJpaCourseDao {
     @Autowired
-    private JpaCourseDao jpaCourseDao;
+    private CourseDao jpaCourseDao;
 
     @Test
     void findAll() {

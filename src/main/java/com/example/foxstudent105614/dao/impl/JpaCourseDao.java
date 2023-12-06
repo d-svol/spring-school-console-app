@@ -19,8 +19,8 @@ import java.util.Optional;
 @Repository
 @Transactional
 public class JpaCourseDao implements CourseDao {
-    public static final String FIND_BY_NAME = "SELECT * FROM Course c WHERE c.course_name = :course_name";
-    private static final String FIND_ALL = "SELECT * FROM Course";
+    public static final String FIND_BY_NAME = "SELECT c FROM Course c WHERE c.courseName = :course_name";
+    private static final String FIND_ALL = "SELECT c FROM Course c";
     private static final String SAVE_STUDENT_COURSE = "INSERT INTO student_course (student_id, course_id) VALUES (:student_id, :course_id)";
     private static final String DELETE_STUDENT_COURSE = "DELETE FROM student_course WHERE student_id = :student_id AND course_id = :course_id";
 
@@ -41,7 +41,7 @@ public class JpaCourseDao implements CourseDao {
     @Override
     public List<Course> findAll() {
         try {
-            return entityManager. createQuery(FIND_ALL, Course.class).getResultList();
+            return entityManager.createQuery(FIND_ALL, Course.class).getResultList();
         } catch (Exception e) {
             logger.error("Error executing 'findAll' database query: ", e);
             return Collections.emptyList();
