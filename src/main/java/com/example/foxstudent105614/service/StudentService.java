@@ -25,15 +25,14 @@ public class StudentService {
         return studentDao.findById(studentId);
     }
 
-    public List<Student> findAll() {return studentDao.findAll();}
+    public List<Student> findAll() {
+        return studentDao.findAll();
+    }
 
     public void save(Student student) {
         studentDao.save(student);
     }
 
-    public void save(int groupId, String firstName, String lastName) {
-        studentDao.save(groupId, firstName, lastName);
-    }
 
     public void update(Student student) {
         studentDao.update(student);

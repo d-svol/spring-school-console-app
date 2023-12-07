@@ -85,7 +85,7 @@ public class DataGenerator {
 									String firstName = iterator.next();
 									iterator.remove();
 									String lastName = FAKER.name().lastName();
-									return new Student(nextStudentId.getAsInt(), group.groupId(), firstName, lastName);
+									return new Student(nextStudentId.getAsInt(), group, firstName, lastName);
 								})
 				)
 				.collect(Collectors.toList());

@@ -1,89 +1,92 @@
 package com.example.foxstudent105614.dao.impl;
 
+
 import com.example.foxstudent105614.dao.GroupDao;
 import com.example.foxstudent105614.model.Group;
-import com.example.foxstudent105614.service.GroupService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.jdbc.Sql;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {GroupService.class})
+
+@DataJpaTest(properties = {"isProductionMode  = false"})
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Sql(
+        scripts = {"classpath:create_table.sql", "classpath:sample_data.sql"},
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+)
 public class TestJdbcGroupDao {
-	@Autowired
-	private GroupService groupService;
+    @Autowired
+    private GroupDao groupDao;
 
-	@MockBean
-	private GroupDao groupDao;
+    @TestConfiguration
+    public static class Configuration {
+        @Bean
+        JpaGroupDao jpaGroupDao() {
+            return new JpaGroupDao();
+        }
+    }
 
-	@Test
-	void findGroupsWithLessOrEqualStudents() {
-		int studentCount = 2;
-		List<Group> expectedGroups = Arrays.asList(
-				new Group(1, "AA-01"),
-				new Group(2, "BB-02")
-		);
-		when(groupDao.findGroupsWithLessOrEqualStudents(studentCount)).thenReturn(expectedGroups);
+    @Test
+    void findGroupsWithLessOrEqualStudents() {
+        int groupSize = 3;
+        int maxStudentCount = 10;
+        List<Group> groups = groupDao.findGroupsWithLessOrEqualStudents(maxStudentCount);
+        assertEquals(groupSize, groups.size());
+    }
 
-		List<Group> actualGroups = groupService.findGroupsWithLessOrEqualStudents(studentCount);
-		assertEquals(expectedGroups.size(), actualGroups.size());
-	}
+    @Test
+    void findById() {
+        int firstID = 1;
+        Optional<Group> group = groupDao.findById(firstID);
+        assertNotNull(group.orElse(null));
+        assertEquals(firstID, group.get().getGroupId());
+        assertEquals("AA-01", group.get().getGroupName());
+    }
 
-	@Test
-	void findById() {
-		int firstID = 1;
-		Group expectedGroup = new Group(1, "AA-01");
-		when(groupDao.findById(firstID)).thenReturn(Optional.of(expectedGroup));
-		Optional<Group> actualGroup = groupService.findById(firstID);
+    @Test
+    void findAll() {
+        List<Group> groups = groupDao.findAll();
+        assertEquals(3, groups.size());
+    }
 
-		assertTrue(actualGroup.isPresent());
-		assertEquals(expectedGroup.groupId(), actualGroup.get().groupId());
-		assertEquals(expectedGroup.groupName(), actualGroup.get().groupName());
-	}
+    @Test
+    void save() {
+        int groupID = 4;
+        Group newGroup = new Group("Test-Group");
+        groupDao.save(newGroup);
 
-	@Test
-	void findAll() {
-		int expectedIndex = 1;
-		List<Group> expectedGroups = Arrays.asList(
-				new Group(1, "AA-01"),
-				new Group(2, "BB-02")
-		);
+        Optional<Group> foundGroup = groupDao.findById(groupID);
+        assertNotNull(foundGroup.orElse(null));
+        assertEquals(groupID, foundGroup.get().getGroupId());
+        assertEquals("Test-Group", foundGroup.get().getGroupName());
+    }
 
-		when(groupDao.findAll()).thenReturn(expectedGroups);
-		List<Group> actualGroups = groupService.findAll();
-		assertEquals(expectedGroups.size(), actualGroups.size());
-		assertEquals(expectedGroups.get(expectedIndex).groupId(), actualGroups.get(expectedIndex).groupId());
-		assertEquals(expectedGroups.get(expectedIndex).groupName(), actualGroups.get(expectedIndex).groupName());
-	}
+    @Test
+    void update() {
+        int groupID = 1;
+        Group updatedGroup = new Group(groupID, "Updated-Group");
+        groupDao.update(updatedGroup);
 
-	@Test
-	void save() {
-		int groupID = 4;
-		Group groupToSave = new Group(groupID, "NewGroup");
-		groupService.save(groupToSave);
-		verify(groupDao, times(1)).save(groupToSave);
-	}
+        Optional<Group> foundGroup = groupDao.findById(groupID);
+        assertNotNull(foundGroup.orElse(null));
+        assertEquals(groupID, foundGroup.get().getGroupId());
+        assertEquals("Updated-Group", foundGroup.get().getGroupName());
+    }
 
-	@Test
-	void update() {
-		int groupID = 1;
-		Group updatedGroup = new Group(groupID, "UpdatedGroup");
-		groupService.update(updatedGroup);
-		verify(groupDao, times(1)).update(updatedGroup);
-	}
-
-	@Test
-	void delete() {
-		int groupID = 1;
-		groupService.delete(groupID);
-		verify(groupDao, times(1)).delete(groupID);
-	}
+    @Test
+    void delete() {
+        int groupID = 1;
+        groupDao.delete(groupID);
+        Optional<Group> foundGroup = groupDao.findById(groupID);
+        assertFalse(foundGroup.isPresent());
+    }
 }

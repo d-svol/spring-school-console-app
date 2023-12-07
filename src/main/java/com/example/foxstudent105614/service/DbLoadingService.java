@@ -7,7 +7,6 @@ import com.example.foxstudent105614.model.Student;
 import com.example.foxstudent105614.util.DataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -46,10 +45,10 @@ public class DbLoadingService {
         try {
             loadDb();
         } catch (IOException e) {
-			log.error("Error loading database: " + e.getMessage(), e);
+            log.error("Error loading database: " + e.getMessage(), e);
             throw new DbException("Error loading database: " + e);
-		}
-	}
+        }
+    }
 
     private void loadDb() throws IOException {
         executeSQLScript();
@@ -85,23 +84,23 @@ public class DbLoadingService {
     private void insertCoursesIntoDatabase(List<Course> courses) {
         jdbcTemplate.batchUpdate(INSERT_COURSES, courses, 10,
                 (ps, course) -> {
-                    ps.setString(1, course.courseName());
-                    ps.setString(2, course.courseDescription());
+                    ps.setString(1, course.getCourseName());
+                    ps.setString(2, course.getCourseDescription());
                 });
     }
 
 
     private void insertGroupsIntoDatabase(List<Group> groups) {
         jdbcTemplate.batchUpdate(INSERT_GROUPS, groups, 10,
-                (ps, group) -> ps.setString(1, group.groupName()));
+                (ps, group) -> ps.setString(1, group.getGroupName()));
     }
 
     private void insertStudentsIntoDatabase(List<Student> students) {
         jdbcTemplate.batchUpdate(INSERT_STUDENTS, students, 10,
                 (ps, student) -> {
-                    ps.setString(1, student.firstName());
-                    ps.setString(2, student.lastName());
-                    ps.setInt(3, student.groupId());
+                    ps.setString(1, student.getFirstName());
+                    ps.setString(2, student.getLastName());
+                    ps.setInt(3, student.getGroup().getGroupId());
                 });
     }
 
@@ -109,9 +108,9 @@ public class DbLoadingService {
         List<Object[]> batchArgs = new ArrayList<>();
 
         studentCourseMap.forEach((student, courses) -> {
-            int studentId = student.studentId();
+            int studentId = student.getStudentId();
             for (Course course : courses) {
-                int courseId = course.courseId();
+                int courseId = course.getCourseId();
                 batchArgs.add(new Object[]{studentId, courseId});
             }
         });

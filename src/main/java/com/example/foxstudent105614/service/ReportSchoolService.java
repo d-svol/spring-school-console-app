@@ -41,20 +41,15 @@ public class ReportSchoolService {
         } else {
             logger.info("Students related to the course '{}':", courseName);
             for (Student student : students) {
-                logger.info("{} {} (ID: {})", student.firstName(), student.lastName(), student.studentId());
+                logger.info("{} {} (ID: {})", student.getFirstName(), student.getLastName(), student.getStudentId());
             }
         }
     }
 
-    public void printAddStudent(int groupId, String firstName, String lastName) {
-        Optional<Group> groupOptional = schoolService.findGroupById(groupId);
-
-        if (groupOptional.isEmpty()) {
-            logger.error("Error: Group not found for id: {}", groupId);
-        } else {
-            schoolService.addStudent(groupId, firstName, lastName);
-            logger.info("Added student {} {} to group with ID: {}", firstName, lastName, groupId);
-        }
+    public void printAddStudent(String firstName, String lastName) {
+        Student student = new Student(firstName, lastName);
+        schoolService.addStudent(student);
+        logger.info("Added new student. First name: {}, Last name: {}", firstName, lastName);
     }
 
     public void printDeleteStudentById(int studentId) {
@@ -62,7 +57,7 @@ public class ReportSchoolService {
 
         studentOptional.ifPresent(student -> {
             schoolService.deleteStudentById(studentId);
-            logger.info("Deleted student with ID: {}", studentId);
+            logger.info("Deleted student: {}", student);
         });
 
         if (studentOptional.isEmpty()) {
@@ -78,7 +73,7 @@ public class ReportSchoolService {
 
             if (courseOptional.isPresent()) {
                 schoolService.saveStudentInCourse(studentId, courseId);
-                logger.info("Added student {} {} to course with ID: {}", student.firstName(), student.lastName(), courseId);
+                logger.info("Added student {} {} to course with ID: {}", student.getFirstName(), student.getLastName(), courseId);
             } else {
                 logger.error("Error: Course not found for ID - CourseID: {}", courseId);
             }
