@@ -4,7 +4,6 @@ import com.example.foxstudent105614.dao.CourseDao;
 import com.example.foxstudent105614.model.Course;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -19,13 +18,14 @@ import java.util.Optional;
 @Repository
 @Transactional
 public class JpaCourseDao implements CourseDao {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public static final String FIND_BY_NAME = "SELECT c FROM Course c WHERE c.courseName = :course_name";
     private static final String FIND_ALL = "SELECT c FROM Course c";
     private static final String SAVE_STUDENT_COURSE = "INSERT INTO student_course (student_id, course_id) VALUES (:student_id, :course_id)";
     private static final String DELETE_STUDENT_COURSE = "DELETE FROM student_course WHERE student_id = :student_id AND course_id = :course_id";
 
-    @PersistenceContext
-    private EntityManager entityManager;
     private static final Logger logger = LoggerFactory.getLogger(JpaCourseDao.class);
 
     @Override

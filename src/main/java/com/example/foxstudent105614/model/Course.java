@@ -9,7 +9,6 @@ import java.util.List;
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "course_id")
     private int courseId;
 
     @Column(name = "course_name")
@@ -22,6 +21,11 @@ public class Course {
     private List<Student> students;
 
     public Course() {
+    }
+
+    public Course(String courseName, String courseDescription) {
+        this.courseName = courseName;
+        this.courseDescription = courseDescription;
     }
 
     public Course(int courseId, String courseName, String courseDescription) {
@@ -54,11 +58,16 @@ public class Course {
         this.courseDescription = courseDescription;
     }
 
+    public List<Student> getStudents() {
+        return students;
+    }
+
     @Override
     public String toString() {
         return "Course{" +
                 "courseId=" + courseId +
                 ", courseName='" + courseName + '\'' +
-                ", courseDescription='" + courseDescription;
+                ", courseDescription='" + courseDescription + '\'' +
+                '}';
     }
 }

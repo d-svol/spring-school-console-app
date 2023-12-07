@@ -46,15 +46,10 @@ public class ReportSchoolService {
         }
     }
 
-    public void printAddStudent(int groupId, String firstName, String lastName) {
-        Optional<Group> groupOptional = schoolService.findGroupById(groupId);
-
-        if (groupOptional.isEmpty()) {
-            logger.error("Error: Group not found for id: {}", groupId);
-        } else {
-            schoolService.addStudent(groupId, firstName, lastName);
-            logger.info("Added student {} {} to group with ID: {}", firstName, lastName, groupId);
-        }
+    public void printAddStudent(String firstName, String lastName) {
+        Student student = new Student(firstName, lastName);
+        schoolService.addStudent(student);
+        logger.info("Added new student. First name: {}, Last name: {}", firstName, lastName);
     }
 
     public void printDeleteStudentById(int studentId) {

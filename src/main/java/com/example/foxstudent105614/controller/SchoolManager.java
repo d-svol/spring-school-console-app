@@ -58,9 +58,8 @@ public class SchoolManager {
         try {
             String firstName = getFirstNameInput(scanner);
             String lastName = getLastNameInput(scanner);
-            int groupId = getIdInput(scanner);
 
-            reportSchoolService.printAddStudent(groupId, firstName, lastName);
+            reportSchoolService.printAddStudent(firstName, lastName);
         } catch (UserExitException e) {
             System.out.println(e.getMessage());
         }
@@ -111,7 +110,7 @@ public class SchoolManager {
 
     private String getFirstNameInput(Scanner scanner) throws UserExitException {
         while (true) {
-            System.out.println("Enter firstname (or 'q' to exit):");
+            System.out.println("Enter first name (or 'q' to exit):");
             String input = scanner.nextLine().trim();
             if (input.equals("q")) {
                 throw new UserExitException("User exited input.");
@@ -125,7 +124,7 @@ public class SchoolManager {
 
     private String getLastNameInput(Scanner scanner) throws UserExitException {
         while (true) {
-            System.out.println("Enter lastname (or 'q' to exit):");
+            System.out.println("Enter last name (or 'q' to exit):");
             String input = scanner.nextLine().trim();
             if (input.equals("q")) {
                 throw new UserExitException("User exited input.");

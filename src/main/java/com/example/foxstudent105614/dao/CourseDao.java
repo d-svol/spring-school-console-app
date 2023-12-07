@@ -1,6 +1,7 @@
 package com.example.foxstudent105614.dao;
 
 import com.example.foxstudent105614.model.Course;
+
 import java.util.Optional;
 
 public interface CourseDao extends Dao<Course>{

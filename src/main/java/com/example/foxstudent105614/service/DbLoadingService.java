@@ -7,7 +7,6 @@ import com.example.foxstudent105614.model.Student;
 import com.example.foxstudent105614.util.DataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -46,10 +45,10 @@ public class DbLoadingService {
         try {
             loadDb();
         } catch (IOException e) {
-			log.error("Error loading database: " + e.getMessage(), e);
+            log.error("Error loading database: " + e.getMessage(), e);
             throw new DbException("Error loading database: " + e);
-		}
-	}
+        }
+    }
 
     private void loadDb() throws IOException {
         executeSQLScript();

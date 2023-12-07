@@ -42,8 +42,8 @@ public class SchoolService {
         return courseService.findById(id);
     }
 
-    public void addStudent(int groupId, String firstName, String lastName) {
-        studentService.save(groupId, firstName, lastName);
+    public void addStudent(Student student) {
+        studentService.save(student);
     }
 
     public void deleteStudentById(int studentId) {

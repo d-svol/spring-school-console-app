@@ -1,6 +1,5 @@
 package com.example.foxstudent105614.model;
 
-
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -12,11 +11,10 @@ public class Student {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "student_id")
     private int studentId;
 
     @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
+    @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
     @Column(name = "first_name", nullable = false)
@@ -34,6 +32,11 @@ public class Student {
     private List<Course> courses;
 
     public Student() {
+    }
+
+    public Student(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     public Student(int studentId, Group group, String firstName, String lastName) {

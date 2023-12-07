@@ -19,7 +19,7 @@ public class JpaGroupDao implements GroupDao {
                     "GROUP BY g.groupId, g.groupName " +
                     "HAVING COUNT(s) <= :maxStudentCount";
 
-    private static final String FIND_ALL = "SELECT * FROM groups";
+    private static final String FIND_ALL = "SELECT g FROM Group g";
 
     @PersistenceContext
     private EntityManager entityManager;
