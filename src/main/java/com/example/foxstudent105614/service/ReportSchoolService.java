@@ -15,11 +15,10 @@ public class ReportSchoolService {
     private final Logger logger = LoggerFactory.getLogger(ReportSchoolService.class);
 
     private final SchoolService schoolService;
-    private final CourseService courseService;
 
-    public ReportSchoolService(SchoolService schoolService, CourseService courseService) {
+    public ReportSchoolService(SchoolService schoolService) {
         this.schoolService = schoolService;
-        this.courseService = courseService;
+
     }
 
     public void printGroupsByStudentCount(int maxStudentCount) {
@@ -67,12 +66,13 @@ public class ReportSchoolService {
 
     public void printSaveStudentInCourse(int studentId, int courseId) {
         Optional<Student> studentOptional = schoolService.findStudentById(studentId);
-        Optional<Course> courseOptional = courseService.findById(courseId);
+        Optional<Course> courseOptional = schoolService.findCourseById(courseId);
+
         if (studentOptional.isPresent()) {
             Student student = studentOptional.get();
 
             if (courseOptional.isPresent()) {
-                schoolService.saveStudentInCourse(studentId, courseId);
+                schoolService.saveStudentInCourse(studentOptional.get().getStudentId(), courseOptional.get().getCourseId());
                 logger.info("Added student {} {} to course with ID: {}", student.getFirstName(), student.getLastName(), courseId);
             } else {
                 logger.error("Error: Course not found for ID - CourseID: {}", courseId);
@@ -83,7 +83,14 @@ public class ReportSchoolService {
     }
 
     public void printDeleteStudentFromCourse(int studentId, int courseId) {
-        schoolService.deleteStudentFromCourse(studentId, courseId);
-        logger.info("Removed student with ID {} from course with ID {}", studentId, courseId);
+        Optional<Student> studentOptional = schoolService.findStudentById(studentId);
+        Optional<Course> courseOptional = schoolService.findCourseById(courseId);
+
+        if (courseOptional.isPresent() && studentOptional.isPresent()) {
+            schoolService.deleteStudentFromCourse(studentId, courseId);
+            logger.info("Removed student with ID {} from course with ID {}", studentId, courseId);
+        } else {
+            logger.info("Course with ID {} or Student with ID {} not found", courseId, studentId);
+        }
     }
 }

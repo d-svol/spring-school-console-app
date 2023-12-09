@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class StudentService {
+public class StudentService implements StudentDao{
     private final StudentDao studentDao;
 
     @Autowired
@@ -17,8 +17,9 @@ public class StudentService {
         this.studentDao = studentDao;
     }
 
-    public List<Student> findStudentsByCourseName(String courseName) {
-        return studentDao.findStudentsByCourseName(courseName);
+    @Override
+    public void delete(Student entity) {
+        studentDao.delete(entity);
     }
 
     public Optional<Student> findById(int studentId) {
@@ -33,13 +34,12 @@ public class StudentService {
         studentDao.save(student);
     }
 
-
     public void update(Student student) {
         studentDao.update(student);
     }
 
-    public void delete(int studentId) {
-        studentDao.delete(studentId);
+    public void deleteById(int studentId) {
+        studentDao.deleteById(studentId);
     }
 }
 

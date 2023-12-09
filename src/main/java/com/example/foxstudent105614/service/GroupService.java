@@ -37,7 +37,7 @@ public class GroupService {
         groupDao.update(group);
     }
 
-    public void delete(int groupId) {
-        groupDao.delete(groupId);
+    public void deleteById(int groupId) {
+        groupDao.deleteById(groupId);
     }
 }

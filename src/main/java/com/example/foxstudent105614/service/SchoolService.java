@@ -27,7 +27,7 @@ public class SchoolService {
     }
 
     public List<Student> findStudentsByCourseName(String courseName) {
-        return studentService.findStudentsByCourseName(courseName);
+        return courseService.findStudentsByCourseName(courseName);
     }
 
     public Optional<Group> findGroupById(int groupID) {
@@ -47,11 +47,11 @@ public class SchoolService {
     }
 
     public void deleteStudentById(int studentId) {
-        studentService.delete(studentId);
+        studentService.deleteById(studentId);
     }
 
-    public void saveStudentInCourse(int studentId, int courseListId) {
-        courseService.saveStudentInCourse(studentId, courseListId);
+    public void saveStudentInCourse(int studentId, int courseId) {
+        courseService.saveStudentInCourse(studentId, courseId);
     }
 
     public void deleteStudentFromCourse(int studentId, int courseId) {
