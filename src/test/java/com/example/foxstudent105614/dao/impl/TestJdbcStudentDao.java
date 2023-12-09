@@ -1,138 +1,100 @@
 package com.example.foxstudent105614.dao.impl;
 
-import com.example.foxstudent105614.dao.StudentDao;
-import com.example.foxstudent105614.model.Student;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.example.foxstudent105614.dao.StudentDao;
+import com.example.foxstudent105614.model.Group;
+import com.example.foxstudent105614.model.Student;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.jdbc.Sql;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@JdbcTest
+@DataJpaTest(properties = {"isProductionMode  = false"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(
-		scripts = {"classpath:create_table.sql", "classpath:sample_data.sql"},
-		executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+        scripts = {"classpath:create_table.sql", "classpath:sample_data.sql"},
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-@Testcontainers
-@ContextConfiguration(classes = TestJdbcStudentDao.class)
-@TestPropertySource(locations = "classpath:/application.yml")
 public class TestJdbcStudentDao {
-	@Autowired
-	private NamedParameterJdbcTemplate jdbcTemplate;
-	private StudentDao studentDao;
+    @Autowired
+    private StudentDao studentDao;
 
-	@Container
-	private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:14.6")
-			.withDatabaseName("test")
-			.withUsername("root")
-			.withPassword("test");
+    @TestConfiguration
+    public static class Configuration {
+        @Bean
+        JpaStudentDao jpaStudentDao() {
+            return new JpaStudentDao();
+        }
+    }
 
-	@BeforeAll
-	static void beforeAll() {
-		postgresContainer.start();
-	}
+    @Test
+    void findById() {
+        int firstID = 1;
+        Optional<Student> foundStudent = studentDao.findById(firstID);
+        assertNotNull(foundStudent.orElse(null));
+        assertEquals(1, foundStudent.get().getStudentId());
+        assertEquals("NameA", foundStudent.get().getFirstName());
+        assertEquals("LastnameA", foundStudent.get().getLastName());
+    }
 
-	@AfterAll
-	static void afterAll() {
-		postgresContainer.stop();
-	}
+    @Test
+    void findStudentsByCourseName() {
+        String courseName = "English";
+        List<Student> foundStudents = studentDao.findStudentsByCourseName(courseName);
+        assertEquals(1, foundStudents.size());
+    }
 
-	@BeforeEach
-	void setUp() {
-		this.studentDao = new JdbcStudentDao(jdbcTemplate);
-	}
+    @Test
+    void findAll() {
+        int studentSize = 5;
+        List<Student> students = studentDao.findAll();
+        assertEquals(studentSize, students.size());
+    }
 
-	@Test
-	void findStudentsByCourseName() {
-		String courseName = "Math";
-		List<Student> students = studentDao.findStudentsByCourseName(courseName);
-		Student firstStudent = students.get(0);
-		assertEquals(1, firstStudent.studentId());
-		assertEquals("NameA", firstStudent.firstName());
-		assertEquals("LastnameA", firstStudent.lastName());
-	}
+    @Test
+    void save() {
+        Student student = new Student("FirstName", "LastName");
+        studentDao.save(student);
 
-	@Test
-	void findById() {
-		int firstID = 1;
-		Optional<Student> student = studentDao.findById(firstID);
-		assertTrue(student.isPresent());
-		assertEquals(1, student.get().studentId());
-		assertEquals("NameA", student.get().firstName());
-		assertEquals("LastnameA", student.get().lastName());
-	}
-
-	@Test
-	void findAll() {
-		List<Student> students = studentDao.findAll();
-		assertEquals(5, students.size());
-	}
-
-	@Test
-	void saveWithoutId() {
-		int studentID = 6;
-		studentDao.save(1, "NewName", "NewLastName");
-
-		Optional<Student> student = studentDao.findById(studentID);
-		assertTrue(student.isPresent());
-		assertEquals(studentID, student.get().studentId());
-		assertEquals(1, student.get().groupId());
-		assertEquals("NewName", student.get().firstName());
-		assertEquals("NewLastName", student.get().lastName());
-	}
-
-	@Test
-	void testSave() {
-		int studentID = 6;
-		int groupID = 1;
-		Student newStudent = new Student(studentID, groupID, "NewName", "NewLastName");
-		studentDao.save(newStudent);
-
-		Optional<Student> student = studentDao.findById(studentID);
-		assertTrue(student.isPresent());
-		assertEquals(studentID, student.get().studentId());
-		assertEquals(groupID, student.get().groupId());
-		assertEquals("NewName", student.get().firstName());
-		assertEquals("NewLastName", student.get().lastName());
-	}
+        Student foundStudent = studentDao.findById(student.getStudentId()).orElse(null);
+        assertNotNull(foundStudent);
+        assertEquals(6, foundStudent.getStudentId());
+        assertEquals("FirstName", foundStudent.getFirstName());
+        assertEquals("LastName", foundStudent.getLastName());
+    }
 
 	@Test
 	void update() {
-		int studentID = 1;
-		int groupID = 1;
-		Student student = new Student(studentID, groupID, "NewName", "NewLastName");
-		studentDao.update(student);
+        int studentID = 1;
+        Student foundStudent = studentDao.findById(studentID).orElse(null);
+        assertNotNull(foundStudent);
+        assertEquals(studentID, foundStudent.getStudentId());
+        assertEquals("NameA", foundStudent.getFirstName());
+        assertEquals("LastnameA", foundStudent.getLastName());
 
-		Optional<Student> foundStudent = studentDao.findById(studentID);
-		assertTrue(foundStudent.isPresent());
-		assertEquals(studentID, foundStudent.get().studentId());
-		assertEquals(groupID, foundStudent.get().groupId());
-		assertEquals("NewName", foundStudent.get().firstName());
-		assertEquals("NewLastName", foundStudent.get().lastName());
+        Student updatedStudent = new Student(studentID, new Group(), "UpdatedFirstName", "UpdatedLastName");
+        studentDao.update(updatedStudent);
+
+        foundStudent = studentDao.findById(updatedStudent.getStudentId()).orElse(null);
+        assertNotNull(foundStudent);
+        assertEquals(studentID, foundStudent.getStudentId());
+        assertEquals("UpdatedFirstName", foundStudent.getFirstName());
+        assertEquals("UpdatedLastName", foundStudent.getLastName());
 	}
 
 	@Test
 	void delete() {
 		int studentID = 1;
 		studentDao.delete(studentID);
-
-		Optional<Student> deletedStudent = studentDao.findById(studentID);
-		assertFalse(deletedStudent.isPresent());
+        Optional<Student> foundStudent = studentDao.findById(studentID);
+        assertFalse(foundStudent.isPresent());
 	}
 }

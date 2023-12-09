@@ -1,6 +1,7 @@
-package com.example.foxstudent105614.service;
+package com.example.foxstudent105614.controller;
 
 import com.example.foxstudent105614.exception.UserExitException;
+import com.example.foxstudent105614.service.ReportSchoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -9,12 +10,12 @@ import java.util.Scanner;
 @Controller
 public class SchoolManager {
     private static final String EMPTY_FIELD_ERROR_MESSAGE = "This field cannot be empty. Please enter a valid value";
-    private static final String INVALID_FORMAT = "Invalid format. Please enter a valid format";
-    private final SchoolService schoolService;
+    private static final String INVALID_FORMAT = "Invalid format: ";
+    private final ReportSchoolService reportSchoolService;
 
     @Autowired
-    public SchoolManager(SchoolService schoolService) {
-        this.schoolService = schoolService;
+    public SchoolManager(ReportSchoolService reportSchoolService) {
+        this.reportSchoolService = reportSchoolService;
     }
 
 
@@ -29,10 +30,10 @@ public class SchoolManager {
 
             try {
                 int maxStudentCount = Integer.parseInt(input);
-                schoolService.findGroupsByStudentCount(maxStudentCount);
+                reportSchoolService.printGroupsByStudentCount(maxStudentCount);
                 validInput = true;
             } catch (NumberFormatException e) {
-                System.out.println(INVALID_FORMAT);
+                System.out.println("Invalid maximum number of students: " + input);
             }
         }
     }
@@ -45,9 +46,9 @@ public class SchoolManager {
             if (courseName.equalsIgnoreCase("q")) {
                 return;
             } else if (courseName.isEmpty()) {
-                System.out.println(EMPTY_FIELD_ERROR_MESSAGE);
+                System.out.println("The name of the course can't be empty");
             } else {
-                schoolService.findStudentsByCourseName(courseName);
+                reportSchoolService.printStudentsByCourseName(courseName);
                 validInput = true;
             }
         }
@@ -57,9 +58,8 @@ public class SchoolManager {
         try {
             String firstName = getFirstNameInput(scanner);
             String lastName = getLastNameInput(scanner);
-            int groupId = getIdInput(scanner);
 
-            schoolService.addStudent(groupId, firstName, lastName);
+            reportSchoolService.printAddStudent(firstName, lastName);
         } catch (UserExitException e) {
             System.out.println(e.getMessage());
         }
@@ -77,7 +77,7 @@ public class SchoolManager {
 
             try {
                 int studentId = Integer.parseInt(input);
-                schoolService.deleteStudentById(studentId);
+                reportSchoolService.printDeleteStudentById(studentId);
                 break;
             } catch (NumberFormatException e) {
                 System.out.println(EMPTY_FIELD_ERROR_MESSAGE);
@@ -90,7 +90,7 @@ public class SchoolManager {
             int studentId = getIdInput(scanner);
             int courseListId = getIdInput(scanner);
 
-            schoolService.saveStudentInCourse(studentId, courseListId);
+            reportSchoolService.printSaveStudentInCourse(studentId, courseListId);
         } catch (UserExitException e) {
             System.out.println(e.getMessage());
         }
@@ -102,7 +102,7 @@ public class SchoolManager {
             int studentId = getIdInput(scanner);
             System.out.println("Select a course by ID");
             int courseId = getIdInput(scanner);
-            schoolService.deleteStudentFromCourse(studentId, courseId);
+            reportSchoolService.printDeleteStudentFromCourse(studentId, courseId);
         } catch (UserExitException e) {
             System.out.println(e.getMessage());
         }
@@ -110,7 +110,7 @@ public class SchoolManager {
 
     private String getFirstNameInput(Scanner scanner) throws UserExitException {
         while (true) {
-            System.out.println("Enter firstname (or 'q' to exit):");
+            System.out.println("Enter first name (or 'q' to exit):");
             String input = scanner.nextLine().trim();
             if (input.equals("q")) {
                 throw new UserExitException("User exited input.");
@@ -124,7 +124,7 @@ public class SchoolManager {
 
     private String getLastNameInput(Scanner scanner) throws UserExitException {
         while (true) {
-            System.out.println("Enter lastname (or 'q' to exit):");
+            System.out.println("Enter last name (or 'q' to exit):");
             String input = scanner.nextLine().trim();
             if (input.equals("q")) {
                 throw new UserExitException("User exited input.");

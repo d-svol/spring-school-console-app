@@ -1,15 +1,14 @@
-package com.example.foxstudent105614.runner;
+package com.example.foxstudent105614.service;
 
 import com.example.foxstudent105614.exception.DbException;
 import com.example.foxstudent105614.model.Course;
 import com.example.foxstudent105614.model.Group;
 import com.example.foxstudent105614.model.Student;
-import com.example.foxstudent105614.service.DataGenerator;
+import com.example.foxstudent105614.util.DataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,9 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-
-@Component
-public class DbLoader {
+@Service
+public class DbLoadingService {
     public static final String INSERT_GROUPS =
             "INSERT INTO groups (group_name) VALUES (?)";
     private static final String INSERT_STUDENTS =
@@ -33,10 +31,11 @@ public class DbLoader {
 
     private static final String SCRIPT_FILE_NAME = "create_table.sql";
 
-    private static final Logger log = LogManager.getLogger(DbLoader.class);
+    private static final Logger log = LogManager.getLogger(DbLoadingService.class);
+
     private final JdbcTemplate jdbcTemplate;
 
-    public DbLoader(JdbcTemplate jdbcTemplate) {
+    public DbLoadingService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -45,10 +44,10 @@ public class DbLoader {
         try {
             loadDb();
         } catch (IOException e) {
-			log.error("Error loading database: " + e.getMessage(), e);
+            log.error("Error loading database: " + e.getMessage(), e);
             throw new DbException("Error loading database: " + e);
-		}
-	}
+        }
+    }
 
     private void loadDb() throws IOException {
         executeSQLScript();
@@ -58,7 +57,7 @@ public class DbLoader {
     private void executeSQLScript() throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(
-                        Objects.requireNonNull(DbLoader.class.getResourceAsStream("/" + DbLoader.SCRIPT_FILE_NAME))))) {
+                        Objects.requireNonNull(DbLoadingService.class.getResourceAsStream("/" + DbLoadingService.SCRIPT_FILE_NAME))))) {
             StringBuilder script = new StringBuilder();
             String line;
 
@@ -84,23 +83,23 @@ public class DbLoader {
     private void insertCoursesIntoDatabase(List<Course> courses) {
         jdbcTemplate.batchUpdate(INSERT_COURSES, courses, 10,
                 (ps, course) -> {
-                    ps.setString(1, course.courseName());
-                    ps.setString(2, course.courseDescription());
+                    ps.setString(1, course.getCourseName());
+                    ps.setString(2, course.getCourseDescription());
                 });
     }
 
 
     private void insertGroupsIntoDatabase(List<Group> groups) {
         jdbcTemplate.batchUpdate(INSERT_GROUPS, groups, 10,
-                (ps, group) -> ps.setString(1, group.groupName()));
+                (ps, group) -> ps.setString(1, group.getGroupName()));
     }
 
     private void insertStudentsIntoDatabase(List<Student> students) {
         jdbcTemplate.batchUpdate(INSERT_STUDENTS, students, 10,
                 (ps, student) -> {
-                    ps.setString(1, student.firstName());
-                    ps.setString(2, student.lastName());
-                    ps.setInt(3, student.groupId());
+                    ps.setString(1, student.getFirstName());
+                    ps.setString(2, student.getLastName());
+                    ps.setInt(3, student.getGroup().getGroupId());
                 });
     }
 
@@ -108,9 +107,9 @@ public class DbLoader {
         List<Object[]> batchArgs = new ArrayList<>();
 
         studentCourseMap.forEach((student, courses) -> {
-            int studentId = student.studentId();
+            int studentId = student.getStudentId();
             for (Course course : courses) {
-                int courseId = course.courseId();
+                int courseId = course.getCourseId();
                 batchArgs.add(new Object[]{studentId, courseId});
             }
         });

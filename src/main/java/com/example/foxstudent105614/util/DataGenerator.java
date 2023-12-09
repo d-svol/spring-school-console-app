@@ -1,10 +1,9 @@
-package com.example.foxstudent105614.service;
+package com.example.foxstudent105614.util;
 
 import com.example.foxstudent105614.model.Course;
 import com.example.foxstudent105614.model.Group;
 import com.example.foxstudent105614.model.Student;
 import com.github.javafaker.Faker;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,7 +12,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-@Component
 public class DataGenerator {
 	private static final int MAX_SUM_GROUPS = 10;
 	private static final int MAX_SUM_COURSES = 10;
@@ -87,7 +85,7 @@ public class DataGenerator {
 									String firstName = iterator.next();
 									iterator.remove();
 									String lastName = FAKER.name().lastName();
-									return new Student(nextStudentId.getAsInt(), group.groupId(), firstName, lastName);
+									return new Student(nextStudentId.getAsInt(), group, firstName, lastName);
 								})
 				)
 				.collect(Collectors.toList());

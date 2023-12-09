@@ -2,6 +2,7 @@ package com.example.foxstudent105614.service;
 
 import com.example.foxstudent105614.dao.CourseDao;
 import com.example.foxstudent105614.model.Course;
+import com.example.foxstudent105614.model.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +38,8 @@ public class CourseService {
         courseDao.update(course);
     }
 
-    public void delete(int courseId) {
-        courseDao.delete(courseId);
+    public void deleteById(int courseId) {
+        courseDao.deleteById(courseId);
     }
 
     public void saveStudentInCourse(int studentId, int courseId) {
@@ -47,5 +48,9 @@ public class CourseService {
 
     public void deleteStudentFromCourse(int studentId, int courseId) {
         courseDao.deleteStudentFromCourse(studentId, courseId);
+    }
+
+    public List<Student> findStudentsByCourseName(String courseName) {
+         return courseDao.findStudentsByCourseName(courseName);
     }
 }

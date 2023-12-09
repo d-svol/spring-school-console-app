@@ -1,5 +1,7 @@
 package com.example.foxstudent105614.dao;
 
+import com.example.foxstudent105614.model.Course;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -12,5 +14,7 @@ public interface Dao<T> {
 
 	void update(T entity);
 
-	void delete(int id);
+	void delete(T entity);
+
+	void deleteById(int id);
 }
